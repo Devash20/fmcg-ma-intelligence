@@ -1,0 +1,12 @@
+[
+  {
+    "removed_id": "deal_001b",
+    "kept_id": "deal_001",
+    "reason": "duplicate_group_match"
+  },
+  {
+    "removed_id": "deal_002b",
+    "kept_id": "deal_002",
+    "reason": "duplicate_group_match"
+  }
+]

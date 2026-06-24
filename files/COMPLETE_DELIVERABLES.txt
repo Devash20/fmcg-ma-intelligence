@@ -1,0 +1,324 @@
+═══════════════════════════════════════════════════════════════════════════════
+  FMCG M&A INTELLIGENCE NEWSLETTER AGENT — COMPLETE DELIVERABLES
+  Real-Time Data Pipeline | Deduplication | Scoring | Auto-Newsletter Draft
+═══════════════════════════════════════════════════════════════════════════════
+
+📦 WHAT YOU'VE RECEIVED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ TWO WORKING VERSIONS:
+   1. STATIC (demo-ready, no setup)
+   2. REAL-TIME (live web scraping, production-grade)
+
+───────────────────────────────────────────────────────────────────────────────
+
+📂 ROOT FILES (14 files)
+───────────────────────────────────────────────────────────────────────────────
+
+📖 DOCUMENTATION & GUIDES:
+  ✓ 00_START_HERE.md (13 KB)                ← READ THIS FIRST
+  ✓ README.md (9 KB)                        ← Pipeline architecture & setup guide
+  ✓ COMPLETE_DELIVERABLES.txt (this file)
+
+🔧 PYTHON CORE SCRIPTS:
+  ✓ pipeline.py (16 KB)                     ← Original static pipeline
+  ✓ pipeline_hybrid.py (14 KB)              ← NEW: Static + live fallback
+  ✓ live_ingestion.py (13 KB)               ← NEW: Real-time web scraping
+  ✓ generate_excel.py (9.8 KB)              ← Excel newsletter generator
+  ✓ generate_word.py (8.2 KB)               ← Word newsletter generator
+  ✓ streamlit_app.py (17 KB)                ← NEW: Interactive dashboard
+
+🌐 WEB INTERFACE:
+  ✓ FMCG_Newsletter_App.html (30 KB)        ← Open in browser (no server)
+
+📊 OUTPUT DATA & DOCUMENTS:
+  ✓ FMCG_MA_Newsletter.xlsx (16 KB)         ← Excel: dashboard + deal table
+  ✓ FMCG_MA_Newsletter.docx (40 KB)         ← Word: styled 5-section newsletter
+  ✓ deals_final.csv (5.4 KB)                ← CSV: all scored deals
+  ✓ deals_final.json (16 KB)                ← JSON: all scored deals
+  ✓ newsletter_draft.txt (6.6 KB)           ← Plain text: newsletter
+  ✓ raw_deals.json (15 KB)                  ← Static fallback: 16 raw articles
+  ✓ dedup_log.json (212 B)                  ← Deduplication log
+
+───────────────────────────────────────────────────────────────────────────────
+
+🚀 QUICK START
+───────────────────────────────────────────────────────────────────────────────
+
+OPTION A: INSTANT DEMO (30 seconds, no dependencies)
+  1. Open: FMCG_Newsletter_App.html (in any web browser)
+  2. View: FMCG_MA_Newsletter.xlsx or FMCG_MA_Newsletter.docx
+
+OPTION B: STATIC PIPELINE (requires Python)
+  pip install openpyxl python-docx
+  python pipeline.py
+  python generate_excel.py
+  python generate_word.py
+
+OPTION C: LIVE DASHBOARD (recommended)
+  pip install streamlit pandas
+  streamlit run streamlit_app.py
+  # Opens: http://localhost:8501 (auto-refreshes every 60 seconds)
+
+OPTION D: FULL REAL-TIME (with API keys)
+  export NEWSAPI_KEY="your_key_from_newsapi.org"
+  pip install streamlit pandas feedparser requests openpyxl python-docx
+  python live_ingestion.py           # Fetch live data
+  python pipeline_hybrid.py --live   # Process with live sources
+  streamlit run streamlit_app.py     # View dashboard
+
+───────────────────────────────────────────────────────────────────────────────
+
+📊 WHAT THE SYSTEM DOES
+───────────────────────────────────────────────────────────────────────────────
+
+INPUT (Raw Articles):
+  → Static: 16 pre-ingested articles
+  → Real-time: 16–100 articles per cycle from 5 sources
+     • NewsAPI (newsapi.org)
+     • RSS Feeds (FoodBev, Reuters, FMCG Newsdesk)
+     • SEC EDGAR filings (8-K, 425)
+     • Google News
+     • Press Release sites
+
+PIPELINE (4 Stages):
+  
+  STAGE 1: INGESTION
+  └─ Parse raw articles, extract structure
+     Input: 16–100 articles | Output: 16–100 structured records
+
+  STAGE 2: DEDUPLICATION
+  └─ Remove duplicate coverage of same deal
+     • Pass A: Exact group match (acquirer + target)
+     • Pass B: Headline similarity ≥ 0.75
+     Input: 16–100 | Output: 14–80 unique deals
+
+  STAGE 3: SCORING
+  └─ Assess relevance (FMCG focus) & credibility (source tier)
+     • Relevance: 0–10 (keyword density, category match)
+     • Credibility: 0–10 (T1=SEC/official, T2=trade, T3=blog)
+     • Composite: 60% relevance + 40% credibility
+     • Filter: Keep only ≥ 5.5 / 10
+     Input: 14–80 | Output: 12–76 passing deals
+
+  STAGE 4: NEWSLETTER DRAFT
+  └─ Auto-generate structured newsletter
+     • 5 sections: Mega (>$10B) / Strategic ($1–10B) / Bolt-on / PE / Failed
+     • Key themes (5 auto-extracted)
+     • Pipeline transparency block
+     • Export: XLSX, DOCX, CSV, JSON, TXT
+
+OUTPUT (Professional Documents):
+  → Excel workbook (4 sheets: dashboard, deals, pipeline log, chart)
+  → Word document (styled sections, themes, transparency)
+  → CSV & JSON (for downstream integrations)
+  → Plain text (for email/slack)
+
+───────────────────────────────────────────────────────────────────────────────
+
+🎯 KEY FEATURES
+───────────────────────────────────────────────────────────────────────────────
+
+REAL-TIME (NEW):
+  ✓ Live data ingestion from 5 sources
+  ✓ Auto-refresh every 60 seconds
+  ✓ Streamlit dashboard with KPIs + pipeline progress
+  ✓ Hybrid mode (falls back to static if APIs fail)
+  ✓ Transparent logging of all pipeline stages
+
+ALWAYS INCLUDED:
+  ✓ Intelligent deduplication (catches multi-source coverage)
+  ✓ Credibility-aware scoring (T1 sources weighted higher)
+  ✓ FMCG domain focus (30+ keyword list)
+  ✓ Business-ready outputs (Excel, Word, CSV)
+  ✓ Full transparency (dedup log, scoring details, pipeline log)
+
+OPTIONAL:
+  ✓ AI agent chat (ask Claude about deals)
+  ✓ Interactive HTML explorer (filter, sort deals)
+  ✓ Customizable thresholds (dedup, score cutoffs)
+
+───────────────────────────────────────────────────────────────────────────────
+
+📈 EXAMPLE OUTPUT
+───────────────────────────────────────────────────────────────────────────────
+
+Newsletter includes 14 tracked deals worth ~$127B:
+
+  MEGA-DEALS (>$10B):
+  🔷 Kimberly-Clark acquires Kenvue for $48.7B  [Approved]
+  🔷 Mars acquires Kellanov for $36.0B          [Completed]
+  🔷 McCormick acquires Unilever Foods $15.7B  [Announced]
+  ... [3 total]
+
+  STRATEGIC ACQUISITIONS ($1B–$10B):
+  🔶 PepsiCo acquires Poppi for $1.95B          [Completed]
+  🔶 Ferrero acquires WK Kellogg for $3.1B      [Completed]
+  🔶 Danone acquires Huel for ~€1B              [Announced]
+  ... [5 total]
+
+  BOLT-ON & UNDISCLOSED:
+  🟡 Hershey acquires LesserEvil                [Completed]
+  🟡 Keurig Dr Pepper acquires JDE Peet's       [Announced]
+  🟡 Emami acquires The Man Company             [Completed]
+  ... [3 total]
+
+  PE / FUND ACTIVITY:
+  🏦 ADIA takes minority stake in Froneri       [Completed]
+  ... [1 total]
+
+  FAILED DEALS:
+  ❌ Coca-Cola shelves Costa Coffee sale        [Shelved]
+  ❌ Pernod Ricard × Brown-Forman collapse      [Failed]
+  ... [2 total]
+
+  KEY THEMES:
+  1. Health & Wellness Premium (14x+ EBITDA)
+  2. DTC Operating Model Access (Danone/Huel)
+  3. Portfolio Cleanup (Unilever, Nestlé)
+  4. GLP-1 Drug Wildcard (reshaping snacking)
+  5. EBITDA Multiple Compression (10–11x)
+
+───────────────────────────────────────────────────────────────────────────────
+
+🛠️ INSTALLATION & DEPENDENCIES
+───────────────────────────────────────────────────────────────────────────────
+
+MINIMAL (Static version):
+  pip install openpyxl python-docx
+  python pipeline.py
+
+RECOMMENDED (Real-time dashboard):
+  pip install streamlit pandas feedparser requests openpyxl python-docx
+  streamlit run streamlit_app.py
+
+FULL (Real-time with web scraping):
+  Same as above + free API key from https://newsapi.org
+
+───────────────────────────────────────────────────────────────────────────────
+
+📋 FILE PURPOSE REFERENCE
+───────────────────────────────────────────────────────────────────────────────
+
+DOCUMENTATION:
+  00_START_HERE.md            Package overview + quick start
+  README.md                   Architecture, features, and setup guide
+
+PYTHON PIPELINES:
+  pipeline.py                 Original static pipeline (16 articles → 14 deals)
+  pipeline_hybrid.py          NEW: Can use static OR live data
+  live_ingestion.py           NEW: Fetches live data from 5 sources
+                              (requires optional API keys)
+
+GENERATORS:
+  generate_excel.py           Converts JSON → Excel workbook
+  generate_word.py            Converts JSON → Word document
+  streamlit_app.py            Interactive real-time dashboard
+
+WEB:
+  FMCG_Newsletter_App.html    Standalone HTML demo (open in browser)
+
+DATA:
+  raw_deals.json              16 raw articles (static fallback)
+  deals_final.json            14 scored deals (pipeline output)
+  deals_final.csv             Same as JSON, CSV format
+  dedup_log.json              Which duplicates were removed
+
+OUTPUTS:
+  FMCG_MA_Newsletter.xlsx     Excel: KPI dashboard + deal table + chart
+  FMCG_MA_Newsletter.docx     Word: 5-section styled newsletter
+  newsletter_draft.txt        Plain text version
+
+───────────────────────────────────────────────────────────────────────────────
+
+🔐 TRANSPARENCY & HONESTY
+───────────────────────────────────────────────────────────────────────────────
+
+✓ Pipeline logic is 100% visible (no black boxes)
+✓ Deduplication: Logged in dedup_log.json (see what was removed + why)
+✓ Scoring: Each deal shows relevance score, credibility tier, composite
+✓ Sources: Every deal lists its source(s) and credibility tier
+✓ Assumptions: Documented in README files
+
+LIMITATIONS:
+  • Dedup similarity threshold (0.75) is configurable but not perfect
+  • Keyword scoring is heuristic-based, not ML
+  • Credibility tiers are editorial judgements
+  • Real-time data subject to API limits (NewsAPI free = 100 req/day)
+  • Not investment advice (for research/monitoring only)
+
+───────────────────────────────────────────────────────────────────────────────
+
+🤔 COMMON QUESTIONS
+───────────────────────────────────────────────────────────────────────────────
+
+Q: Do I need an API key to run this?
+A: No. Static version works with no setup. Real-time works better with
+   NewsAPI key (free tier available at newsapi.org).
+
+Q: How fresh is the data?
+A: Static = pre-computed. Real-time = 1–5 minutes old (depends on source).
+
+Q: Can I schedule this to run automatically?
+A: Yes. Use cron (Linux), Task Scheduler (Windows), or Lambda (AWS).
+
+Q: What if I want to integrate with Slack/Email?
+A: Read outputs (newsletter_draft.txt or XLSX/DOCX) and integrate downstream.
+
+Q: Is this accurate for making investment decisions?
+A: No. This is a research/monitoring tool, not investment advice.
+   All outputs carry "for informational purposes only" disclaimers.
+
+Q: Can I modify the scoring logic?
+A: Yes. Edit FMCG_KEYWORDS, CREDIBILITY_TIERS, or the scoring functions
+   in pipeline.py or pipeline_hybrid.py.
+
+───────────────────────────────────────────────────────────────────────────────
+
+📧 WHAT TO DO NOW
+───────────────────────────────────────────────────────────────────────────────
+
+1. READ: 00_START_HERE.md (5 min)
+2. CHOOSE: One of 4 quick-start options (30 sec – 20 min)
+3. VIEW: Excel, Word, or HTML outputs (2 min)
+4. EXPLORE: Deals table, filter by category/status (5 min)
+5. RUN: Streamlit dashboard to see real-time capability (optional, 5 min)
+
+Then customize for your use case! 🚀
+
+───────────────────────────────────────────────────────────────────────────────
+
+📞 SUPPORT
+───────────────────────────────────────────────────────────────────────────────
+
+This is a reference implementation. All code is readable, modular, and
+designed to be customized for your specific needs.
+
+Key files to modify:
+  • FMCG_KEYWORDS → Add your domain terms
+  • CREDIBILITY_TIERS → Adjust source weighting
+  • Scoring functions → Change relevance/credibility weights
+  • Data sources → Add/remove NewsAPI, RSS feeds, etc.
+
+───────────────────────────────────────────────────────────────────────────────
+
+✅ YOU NOW HAVE:
+  ✓ Complete source code (all 6 Python scripts)
+  ✓ Real-time ingestion (5 live sources)
+  ✓ Static fallback (for testing)
+  ✓ Professional outputs (Excel, Word, CSV, JSON)
+  ✓ Interactive dashboard (Streamlit)
+  ✓ HTML demo (browser-based)
+  ✓ Full documentation (3 guides)
+  ✓ Transparent pipeline (logs everything)
+  ✓ Production-ready (or customize as needed)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Start with: 00_START_HERE.md
+
+Questions? Check README.md for details.
+
+Happy analyzing! 📊🚀
+
+═══════════════════════════════════════════════════════════════════════════════
