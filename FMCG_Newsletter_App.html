@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FMCG M&A Intelligence Newsletter Agent</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#1B3A5C;--teal:#0D7377;--teal-light:#14A085;--amber:#F0A500;
+    --green:#27AE60;--red:#C0392B;--slate:#2C3E50;
+    --bg:#F8FAFC;--card:#FFFFFF;--border:#E2E8F0;--text:#1E293B;--muted:#64748B;
+  }
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+  .topbar{background:var(--navy);color:#fff;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+  .topbar-brand{display:flex;align-items:center;gap:10px;font-size:1rem;font-weight:600;letter-spacing:.3px}
+  .topbar-brand .badge{background:var(--teal);color:#fff;font-size:.65rem;padding:2px 7px;border-radius:99px;font-weight:700;letter-spacing:.5px}
+  .topbar-right{display:flex;align-items:center;gap:1.2rem;font-size:.85rem;opacity:.85}
+  .topbar-right span{cursor:default}
+
+  .hero{background:linear-gradient(135deg,var(--navy) 0%,#2a5298 60%,var(--teal) 100%);color:#fff;padding:3rem 2rem 2.5rem;text-align:center}
+  .hero h1{font-size:2rem;font-weight:700;margin-bottom:.5rem}
+  .hero p{font-size:1rem;opacity:.85;max-width:600px;margin:0 auto 1.5rem}
+  .hero .pill-row{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center}
+  .pill{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:4px 14px;border-radius:99px;font-size:.78rem;font-weight:500}
+
+  .kpi-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:0;background:var(--card);border-bottom:1px solid var(--border)}
+  .kpi{padding:1rem 1.5rem;text-align:center;border-right:1px solid var(--border)}
+  .kpi:last-child{border-right:none}
+  .kpi-val{font-size:1.7rem;font-weight:700;color:var(--navy)}
+  .kpi-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+  .kpi-accent{width:3px;height:28px;border-radius:2px;margin:0 auto 6px}
+
+  .layout{display:grid;grid-template-columns:260px 1fr;gap:0;min-height:calc(100vh - 56px - 80px - 160px)}
+
+  .sidebar{background:#fff;border-right:1px solid var(--border);padding:1.5rem 1rem}
+  .sidebar-section{margin-bottom:1.5rem}
+  .sidebar-title{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.75rem}
+  .filter-btn{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:.85rem;color:var(--text);text-align:left;transition:.15s}
+  .filter-btn:hover{background:var(--bg)}
+  .filter-btn.active{background:#EAF2FB;color:var(--navy);font-weight:600}
+  .filter-btn .count{margin-left:auto;background:var(--border);color:var(--muted);font-size:.7rem;padding:1px 7px;border-radius:99px}
+  .filter-btn.active .count{background:var(--navy);color:#fff}
+  .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+  .main{padding:1.5rem 2rem;overflow:auto}
+
+  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+  .section-header h2{font-size:1rem;font-weight:700;color:var(--navy)}
+  .section-header .meta{font-size:.78rem;color:var(--muted)}
+
+  .deal-grid{display:grid;grid-template-columns:1fr;gap:.75rem;margin-bottom:2rem}
+  .deal-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;cursor:pointer;transition:.15s;border-left:4px solid transparent}
+  .deal-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-1px)}
+  .deal-card.mega{border-left-color:#1B3A5C}
+  .deal-card.strategic{border-left-color:#0D7377}
+  .deal-card.bolton{border-left-color:#F0A500}
+  .deal-card.pe{border-left-color:#8E44AD}
+  .deal-card.failed{border-left-color:#C0392B;opacity:.85}
+
+  .deal-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+  .deal-headline{font-size:.95rem;font-weight:600;color:var(--text);line-height:1.4;flex:1}
+  .deal-value{font-size:.95rem;font-weight:700;color:var(--navy);white-space:nowrap}
+  .deal-meta{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem}
+  .tag{padding:2px 10px;border-radius:99px;font-size:.72rem;font-weight:500}
+  .tag-cat{background:#EAF2FB;color:#1B3A5C}
+  .tag-geo{background:#E8F8F5;color:#0D7377}
+  .tag-status-ok{background:#D5F5E3;color:#1E8449}
+  .tag-status-pending{background:#FEF9E7;color:#9A7D0A}
+  .tag-status-failed{background:#FADBD8;color:#922B21}
+  .deal-rationale{font-size:.82rem;color:var(--muted);margin-top:.5rem;line-height:1.5}
+  .deal-source{font-size:.7rem;color:var(--muted);margin-top:.5rem;display:flex;align-items:center;gap:4px}
+
+  .score-bar{display:flex;align-items:center;gap:6px;margin-top:.5rem}
+  .score-fill{height:4px;border-radius:2px;background:linear-gradient(90deg,#0D7377,#14A085)}
+  .score-label{font-size:.7rem;color:var(--muted)}
+
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.5rem}
+  .panel-title{font-size:.85rem;font-weight:700;color:var(--navy);margin-bottom:1rem;display:flex;align-items:center;gap:6px}
+
+  .chart-wrap{position:relative;width:100%;height:220px}
+
+  .pipeline-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
+  .step{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem;position:relative}
+  .step-num{font-size:1.5rem;font-weight:800;color:var(--border);line-height:1}
+  .step-name{font-size:.78rem;font-weight:700;color:var(--navy);margin:.3rem 0 .2rem}
+  .step-desc{font-size:.7rem;color:var(--muted);line-height:1.4}
+  .step-stat{font-size:.7rem;font-weight:600;background:#EAF2FB;color:var(--navy);padding:2px 8px;border-radius:99px;display:inline-block;margin-top:.4rem}
+  .arrow{position:absolute;right:-12px;top:50%;transform:translateY(-50%);color:var(--border);font-size:.9rem;z-index:2}
+
+  .theme-card{background:var(--bg);border-radius:10px;padding:.85rem 1rem;margin-bottom:.5rem;display:flex;gap:.75rem;align-items:flex-start}
+  .theme-icon{width:32px;height:32px;border-radius:8px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+  .theme-title{font-size:.83rem;font-weight:600;color:var(--text);margin-bottom:.15rem}
+  .theme-body{font-size:.76rem;color:var(--muted);line-height:1.45}
+
+  .agent-chat{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1.5rem}
+  .agent-header{background:var(--navy);color:#fff;padding:.75rem 1.25rem;font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:8px}
+  .agent-body{padding:1rem;max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem}
+  .msg{padding:.5rem .85rem;border-radius:10px;font-size:.82rem;line-height:1.5;max-width:85%}
+  .msg-ai{background:#EAF2FB;color:var(--text);align-self:flex-start}
+  .msg-user{background:var(--navy);color:#fff;align-self:flex-end}
+  .agent-input{display:flex;border-top:1px solid var(--border);background:#F8FAFC}
+  .agent-input input{flex:1;border:none;background:transparent;padding:.75rem 1rem;font-size:.85rem;outline:none}
+  .agent-input button{background:var(--teal);color:#fff;border:none;padding:.5rem 1.25rem;cursor:pointer;font-size:.82rem;font-weight:600;transition:.15s}
+  .agent-input button:hover{background:var(--teal-light)}
+  .agent-input button:disabled{opacity:.5;cursor:not-allowed}
+  .thinking{display:flex;gap:3px;align-items:center;padding:.5rem .85rem}
+  .dot-bounce{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:bounce .8s infinite}
+  .dot-bounce:nth-child(2){animation-delay:.15s}
+  .dot-bounce:nth-child(3){animation-delay:.3s}
+  @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+
+  .footer{background:var(--navy);color:rgba(255,255,255,.6);text-align:center;padding:1rem;font-size:.78rem}
+
+  .hidden{display:none!important}
+  @media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:1px solid var(--border)}.kpi-bar{grid-template-columns:repeat(3,1fr)}.pipeline-steps{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <i class="fa-solid fa-chart-line" style="color:#14A085"></i>
+    FMCG Intel Agent
+    <span class="badge">LIVE</span>
+  </div>
+  <div class="topbar-right">
+    <span><i class="fa-solid fa-calendar-days"></i> Jun 21, 2026</span>
+    <span><i class="fa-solid fa-database"></i> 16 sources</span>
+    <span><i class="fa-solid fa-shield-halved"></i> Credibility scored</span>
+  </div>
+</div>
+
+<div class="hero">
+  <h1><i class="fa-solid fa-newspaper" style="color:#14A085"></i> FMCG M&A Intelligence Newsletter</h1>
+  <p>Real-time deal aggregation · Deduplication · Relevance scoring · Auto-drafted newsletter</p>
+  <div class="pill-row">
+    <span class="pill"><i class="fa-solid fa-arrow-down-to-line"></i> Ingestion</span>
+    <span class="pill">→</span>
+    <span class="pill"><i class="fa-solid fa-filter"></i> Dedup</span>
+    <span class="pill">→</span>
+    <span class="pill"><i class="fa-solid fa-star"></i> Scoring</span>
+    <span class="pill">→</span>
+    <span class="pill"><i class="fa-solid fa-envelope"></i> Newsletter</span>
+  </div>
+</div>
+
+<div class="kpi-bar">
+  <div class="kpi">
+    <div class="kpi-accent" style="background:var(--navy)"></div>
+    <div class="kpi-val">16</div>
+    <div class="kpi-label">Raw Articles</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-accent" style="background:var(--teal)"></div>
+    <div class="kpi-val">14</div>
+    <div class="kpi-label">Unique Deals</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-accent" style="background:var(--green)"></div>
+    <div class="kpi-val">$127B</div>
+    <div class="kpi-label">Total Value</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-accent" style="background:var(--amber)"></div>
+    <div class="kpi-val">2</div>
+    <div class="kpi-label">Dupes Removed</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-accent" style="background:var(--red)"></div>
+    <div class="kpi-val">8.6</div>
+    <div class="kpi-label">Avg Score /10</div>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">Deal Type</div>
+      <button class="filter-btn active" onclick="filterDeals('all',this)">
+        <span class="dot" style="background:var(--navy)"></span> All Deals <span class="count">14</span>
+      </button>
+      <button class="filter-btn" onclick="filterDeals('mega',this)">
+        <span class="dot" style="background:#1B3A5C"></span> Mega-Deals &gt;$10B <span class="count">3</span>
+      </button>
+      <button class="filter-btn" onclick="filterDeals('strategic',this)">
+        <span class="dot" style="background:#0D7377"></span> Strategic $1–10B <span class="count">5</span>
+      </button>
+      <button class="filter-btn" onclick="filterDeals('bolton',this)">
+        <span class="dot" style="background:#F0A500"></span> Bolt-on / Undisclosed <span class="count">3</span>
+      </button>
+      <button class="filter-btn" onclick="filterDeals('pe',this)">
+        <span class="dot" style="background:#8E44AD"></span> PE / Fund Activity <span class="count">1</span>
+      </button>
+      <button class="filter-btn" onclick="filterDeals('failed',this)">
+        <span class="dot" style="background:#C0392B"></span> Failed / Shelved <span class="count">2</span>
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Category</div>
+      <button class="filter-btn" onclick="filterCategory('snack',this)">🍫 Snacking / Food <span class="count">3</span></button>
+      <button class="filter-btn" onclick="filterCategory('bev',this)">🥤 Beverages <span class="count">4</span></button>
+      <button class="filter-btn" onclick="filterCategory('care',this)">🧴 Personal Care <span class="count">2</span></button>
+      <button class="filter-btn" onclick="filterCategory('ing',this)">🌾 Ingredients <span class="count">1</span></button>
+      <button class="filter-btn" onclick="filterCategory('other',this)">📦 Other <span class="count">4</span></button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Pipeline Stats</div>
+      <div style="font-size:.75rem;color:var(--muted);line-height:1.8">
+        <div>Dedup method: <b>Group + Similarity</b></div>
+        <div>Threshold: <b>0.75 cosine</b></div>
+        <div>Cred. tiers: <b>T1/T2/T3</b></div>
+        <div>Score cutoff: <b>≥5.5 / 10</b></div>
+        <div>Sources: <b>SEC, FoodBev, MBS</b></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="main">
+
+    <!-- AI Agent Chat -->
+    <div class="agent-chat">
+      <div class="agent-header">
+        <i class="fa-solid fa-robot" style="color:#14A085"></i>
+        FMCG Intel Agent — Ask about the deals
+      </div>
+      <div class="agent-body" id="chatBody">
+        <div class="msg msg-ai">
+          Hello! I'm the FMCG M&A Intel Agent. I've analysed <b>14 unique deals</b> worth <b>~$127B</b> from 2025–2026. Ask me about trends, specific deals, or request a newsletter draft.
+        </div>
+        <div class="msg msg-ai">
+          Try: <i>"What are the top 3 mega-deals?"</i> or <i>"Summarise the key themes"</i> or <i>"Draft a newsletter intro"</i>
+        </div>
+      </div>
+      <div class="agent-input">
+        <input type="text" id="chatInput" placeholder="Ask about FMCG M&A deals…" onkeydown="if(event.key==='Enter')sendMsg()">
+        <button onclick="sendMsg()" id="sendBtn"><i class="fa-solid fa-paper-plane"></i> Send</button>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">
+      <div class="panel">
+        <div class="panel-title"><i class="fa-solid fa-chart-bar" style="color:var(--teal)"></i> Deal Values ($B)</div>
+        <div class="chart-wrap">
+          <canvas id="barChart" role="img" aria-label="Bar chart showing FMCG deal values from 2025 to 2026">Deal values: Kimberly-Clark/Kenvue $48.7B, Mars/Kellanova $36B, McCormick/Unilever $15.7B, Froneri $15B, Ferrero/WK Kellogg $3.1B, Ingredion/Tate&Lyle $3.6B, Celsius/Alani Nu $1.8B, PepsiCo/Poppi $1.95B, Danone/Huel $1.1B.</canvas>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><i class="fa-solid fa-chart-pie" style="color:var(--teal)"></i> By Category</div>
+        <div class="chart-wrap">
+          <canvas id="pieChart" role="img" aria-label="Pie chart showing deal distribution by FMCG category">Categories: Beverages 29%, Personal Care 21%, Snacking 21%, Food Ingredients 7%, Other 22%.</canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pipeline diagram -->
+    <div class="panel">
+      <div class="panel-title"><i class="fa-solid fa-diagram-project" style="color:var(--teal)"></i> Pipeline Architecture</div>
+      <div class="pipeline-steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-name">Ingestion</div>
+          <div class="step-desc">Web search + trusted sources: SEC filings, FoodBev, MBS Group, Intellizence, trade press</div>
+          <span class="step-stat">16 articles</span>
+          <span class="arrow"><i class="fa-solid fa-arrow-right"></i></span>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-name">Deduplication</div>
+          <div class="step-desc">Exact group match (acquirer+target) + headline similarity ≥0.75 (SequenceMatcher). Keeps primary/highest-tier source.</div>
+          <span class="step-stat">→ 14 unique</span>
+          <span class="arrow"><i class="fa-solid fa-arrow-right"></i></span>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-name">Scoring</div>
+          <div class="step-desc">FMCG keyword density (30+ terms) × credibility tier (T1/T2/T3). Composite = 60% relevance + 40% credibility. Cutoff ≥5.5</div>
+          <span class="step-stat">All 14 pass</span>
+          <span class="arrow"><i class="fa-solid fa-arrow-right"></i></span>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <div class="step-name">Newsletter</div>
+          <div class="step-desc">Structured output: 5 sections (Mega/Strategic/Bolt-on/PE/Failed) + key themes + pipeline transparency.</div>
+          <span class="step-stat">Draft ready</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deal cards -->
+    <div class="section-header">
+      <h2 id="dealSectionTitle">All Deals — 14 tracked</h2>
+      <span class="meta">Sorted by deal value</span>
+    </div>
+    <div class="deal-grid" id="dealGrid">
+      <!-- populated by JS -->
+    </div>
+
+    <!-- Key Themes -->
+    <div class="panel">
+      <div class="panel-title"><i class="fa-solid fa-binoculars" style="color:var(--teal)"></i> Key Themes to Watch</div>
+      <div class="theme-card">
+        <div class="theme-icon">💊</div>
+        <div><div class="theme-title">Health & Wellness Premium</div><div class="theme-body">Functional beverages (Poppi, Alani Nu) command 14x+ EBITDA multiples — highest in F&B. Expect continued bolt-ons in H2 2026.</div></div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-icon">📱</div>
+        <div><div class="theme-title">DTC Operating Model Access</div><div class="theme-body">Danone/Huel and Emami/ManCo signal FMCG majors buying digital-native distribution and subscription capability, not just brand equity.</div></div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-icon">🗂️</div>
+        <div><div class="theme-title">Portfolio Cleanup</div><div class="theme-body">Unilever food exit, Nestlé water sale, Coca-Cola/Costa saga — conglomerates shedding operationally distinct or margin-dilutive categories.</div></div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-icon">💉</div>
+        <div><div class="theme-title">GLP-1 Drug Wildcard</div><div class="theme-body">Weight-loss drug adoption reshaping snack/confectionery M&A thesis. Boards actively re-evaluating high-calorie category concentration.</div></div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-icon">📊</div>
+        <div><div class="theme-title">EBITDA Multiple Compression</div><div class="theme-body">Food & bev multiples settling at 10–11x vs 14x+ for functional. PE applying greater discipline; strategic buyers absorb premium for category access.</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer">
+  FMCG Intel Agent &nbsp;|&nbsp; Powered by Claude (Anthropic) &nbsp;|&nbsp; For demonstration purposes only &nbsp;|&nbsp; Not investment advice
+</div>
+
+<script>
+const DEALS = [
+  {type:"mega",cat:"care",headline:"Kimberly-Clark Acquires Kenvue for $48.7B",acquirer:"Kimberly-Clark",target:"Kenvue",value:48.7,category:"Personal Care / Consumer Health",geography:"USA",status:"Approved / Closing",statusType:"ok",score:10.0,source:"SEC Filing (Form 8-K)",rationale:"Creates a $32B global health and wellness leader combining Huggies, Kleenex, Band-Aid, Tylenol; $2.1B run-rate synergies expected"},
+  {type:"mega",cat:"snack",headline:"Mars Acquires Kellanova in $36B Snacking Mega-Deal",acquirer:"Mars",target:"Kellanova",value:36.0,category:"Snacking / Food",geography:"USA / Global",status:"Completed – EU Approved",statusType:"ok",score:8.8,source:"MBS Group / FoodBev Media",rationale:"Creates global snacking powerhouse; stabilises Mars in high-scale category under consumer demand pressure"},
+  {type:"mega",cat:"other",headline:"McCormick Acquires Unilever Food Business for $15.7B",acquirer:"McCormick & Co.",target:"Unilever Foods (Knorr, Hellmann's)",value:15.7,category:"Food / Condiments / Spices",geography:"Global",status:"Announced",statusType:"pending",score:8.4,source:"IDNFinancials / MBS Group",rationale:"Transforms McCormick into global food giant; Unilever sheds non-core food to focus on beauty & home"},
+  {type:"pe",cat:"other",headline:"Froneri Valued at €15B — ADIA Comes in as Minority",acquirer:"ADIA (minority stake)",target:"Froneri",value:15.0,category:"Ice Cream / Frozen Foods",geography:"UK / Global",status:"Completed",statusType:"ok",score:7.8,source:"FoodBev Media",rationale:"Sovereign wealth confidence in premium ice cream at ~10–11x EBITDA; PAI Partners restructures stake"},
+  {type:"strategic",cat:"ing",headline:"Ingredion to Acquire Tate & Lyle in $3.6B Deal",acquirer:"Ingredion",target:"Tate & Lyle",value:3.6,category:"Food Ingredients / Sweeteners",geography:"USA / UK",status:"Announced",statusType:"pending",score:7.4,source:"Intellizence",rationale:"Combines two food ingredient giants to create leading B2B food solutions provider; expands specialty portfolio"},
+  {type:"strategic",cat:"snack",headline:"Ferrero Acquires WK Kellogg for $3.1B",acquirer:"Ferrero",target:"WK Kellogg Co.",value:3.1,category:"Cereal / Breakfast / Snacking",geography:"USA / Global",status:"Completed",statusType:"ok",score:8.8,source:"MBS Group",rationale:"Consolidates breakfast/cereal category; leverages Ferrero's global distribution and brand building"},
+  {type:"strategic",cat:"bev",headline:"PepsiCo Acquires Poppi Prebiotic Soda for $1.95B",acquirer:"PepsiCo",target:"Poppi",value:1.95,category:"Functional Beverages / Health",geography:"USA",status:"Completed – May 2025",statusType:"ok",score:8.8,source:"MBS Group",rationale:"Accesses DTC and prebiotic/functional beverage model; includes $300M anticipated cash tax benefits"},
+  {type:"strategic",cat:"bev",headline:"Celsius Holdings Acquires Alani Nu for $1.8B",acquirer:"Celsius Holdings",target:"Alani Nu",value:1.8,category:"Functional Beverages / Energy",geography:"USA",status:"Completed",statusType:"ok",score:8.2,source:"FoodBev Media",rationale:"Consolidates functional energy drink segment; targets wellness-oriented female consumer demographic"},
+  {type:"strategic",cat:"other",headline:"Danone Acquires Huel Meal Replacement for ~€1B",acquirer:"Danone",target:"Huel",value:1.1,category:"Nutrition / Meal Replacement / DTC",geography:"UK / Global",status:"Announced",statusType:"pending",score:8.8,source:"MBS Group",rationale:"Gains DTC subscription model and GenZ health brand; accesses digital-native revenue channel"},
+  {type:"bolton",cat:"snack",headline:"Hershey Acquires LesserEvil for Premium Snacking",acquirer:"The Hershey Company",target:"LesserEvil",value:null,category:"Snacking / Better-For-You",geography:"USA",status:"Completed",statusType:"ok",score:7.6,source:"FoodBev Media",rationale:"Enters premium BFY snacking to offset pressure on conventional candy; diversifies portfolio"},
+  {type:"bolton",cat:"bev",headline:"Keurig Dr Pepper Acquires JDE Peet's Coffee",acquirer:"Keurig Dr Pepper",target:"JDE Peet's",value:null,category:"Coffee / Beverages",geography:"USA / Netherlands",status:"Announced",statusType:"pending",score:8.8,source:"MBS Group",rationale:"Strengthens global coffee position; leverages Keurig single-serve platform with JDE's retail brands"},
+  {type:"bolton",cat:"care",headline:"Emami Acquires Remaining 49.6% of The Man Company",acquirer:"Emami Limited",target:"The Man Company",value:null,category:"Personal Care / D2C Grooming",geography:"India",status:"Completed",statusType:"ok",score:7.2,source:"Entrepreneur India",rationale:"Strengthens D2C presence with millennial men's grooming brand; deepens digital channel capability"},
+  {type:"failed",cat:"bev",headline:"Coca-Cola Shelves Costa Coffee Sale",acquirer:"N/A – Sale Abandoned",target:"Costa Coffee",value:null,category:"Coffee / Retail Café",geography:"UK / Global",status:"Failed / Shelved",statusType:"failed",score:7.0,source:"FoodBev Media",rationale:"Originally acquired for £3.9B in 2018; PE bidders failed to meet Coca-Cola's price; shelved Dec 2025"},
+  {type:"failed",cat:"other",headline:"Pernod Ricard × Brown-Forman Merger Talks Collapse",acquirer:"N/A – Talks Collapsed",target:"Brown-Forman",value:null,category:"Spirits / Alcohol",geography:"France / USA",status:"Failed",statusType:"failed",score:7.2,source:"MBS Group",rationale:"Spirits scale consolidation attempt failed on valuation mismatch and structural complexity"},
+];
+
+function getStatusClass(t){return t==="ok"?"tag-status-ok":t==="failed"?"tag-status-failed":"tag-status-pending"}
+function fmtVal(v){return v?`$${v.toFixed(1)}B`:"Undisclosed"}
+function fmtScore(s){return `<div class='score-bar'><div class='score-fill' style='width:${s*10}%;background:${s>=9?"#27AE60":s>=7?"#0D7377":"#F0A500"}'></div><span class='score-label'>Score: ${s}/10</span></div>`}
+
+function renderDeals(list, title){
+  const grid = document.getElementById("dealGrid");
+  document.getElementById("dealSectionTitle").textContent = title || `All Deals — ${list.length} tracked`;
+  grid.innerHTML = list.map(d=>`
+    <div class="deal-card ${d.type}">
+      <div class="deal-top">
+        <div class="deal-headline">${d.headline}</div>
+        <div class="deal-value">${fmtVal(d.value)}</div>
+      </div>
+      <div class="deal-meta">
+        <span class="tag tag-cat">${d.category}</span>
+        <span class="tag tag-geo">${d.geography}</span>
+        <span class="tag ${getStatusClass(d.statusType)}">${d.status}</span>
+      </div>
+      ${fmtScore(d.score)}
+      <div class="deal-rationale">${d.rationale}</div>
+      <div class="deal-source"><i class="fa-solid fa-circle-info" style="font-size:.65rem"></i> ${d.source}</div>
+    </div>
+  `).join("");
+}
+
+let activeTypeFilter = "all";
+let activeCatFilter = null;
+
+function filterDeals(type, btn){
+  document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  activeTypeFilter = type;
+  activeCatFilter = null;
+  applyFilters();
+}
+
+function filterCategory(cat, btn){
+  document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  activeCatFilter = cat;
+  activeTypeFilter = "all";
+  applyFilters();
+}
+
+function applyFilters(){
+  let list = [...DEALS];
+  if(activeTypeFilter !== "all") list = list.filter(d=>d.type===activeTypeFilter);
+  if(activeCatFilter) list = list.filter(d=>d.cat===activeCatFilter);
+  const typeLabel = {mega:"Mega-Deals",strategic:"Strategic Acquisitions",bolton:"Bolt-on / Undisclosed",pe:"PE Activity",failed:"Failed Deals",all:"All Deals"};
+  renderDeals(list, `${typeLabel[activeTypeFilter]||"Filtered"} — ${list.length} deals`);
+}
+
+renderDeals(DEALS);
+
+// Charts
+const barCtx = document.getElementById("barChart").getContext("2d");
+const withValue = DEALS.filter(d=>d.value).sort((a,b)=>b.value-a.value);
+new Chart(barCtx,{
+  type:"bar",
+  data:{
+    labels: withValue.map(d=>d.acquirer),
+    datasets:[{
+      label:"Deal Value ($B)",
+      data: withValue.map(d=>d.value),
+      backgroundColor: withValue.map(d=>d.type==="mega"?"#1B3A5C":d.type==="pe"?"#8E44AD":"#0D7377"),
+      borderRadius:4,
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{y:{beginAtZero:true,grid:{color:"rgba(0,0,0,.06)"}},x:{grid:{display:false},ticks:{font:{size:9}}}}
+  }
+});
+
+const pieCtx = document.getElementById("pieChart").getContext("2d");
+new Chart(pieCtx,{
+  type:"doughnut",
+  data:{
+    labels:["Beverages","Personal Care","Snacking / Food","Ingredients","Other"],
+    datasets:[{
+      data:[29,21,21,7,22],
+      backgroundColor:["#0D7377","#1B3A5C","#F0A500","#27AE60","#8E44AD"],
+      borderWidth:2,borderColor:"#fff"
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:"bottom",labels:{font:{size:10},boxWidth:12}}}
+  }
+});
+
+// AI Chat
+const DEAL_CONTEXT = JSON.stringify(DEALS.map(d=>({headline:d.headline,acquirer:d.acquirer,target:d.target,value:d.value,category:d.category,status:d.status,rationale:d.rationale})));
+
+async function sendMsg(){
+  const input = document.getElementById("chatInput");
+  const body = document.getElementById("chatBody");
+  const btn = document.getElementById("sendBtn");
+  const text = input.value.trim();
+  if(!text) return;
+
+  body.innerHTML += `<div class="msg msg-user">${text}</div>`;
+  input.value = "";
+  btn.disabled = true;
+
+  const thinking = document.createElement("div");
+  thinking.className = "thinking";
+  thinking.innerHTML = `<div class="dot-bounce"></div><div class="dot-bounce"></div><div class="dot-bounce"></div>`;
+  body.appendChild(thinking);
+  body.scrollTop = body.scrollHeight;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-6",
+        max_tokens:1000,
+        system:`You are the FMCG M&A Intelligence Agent. You have access to a curated database of 14 FMCG deals from 2025-2026 worth ~$127B total. Answer questions concisely and insightfully. Format with short paragraphs. Here is the deal data: ${DEAL_CONTEXT}`,
+        messages:[{role:"user",content:text}]
+      })
+    });
+    const data = await res.json();
+    thinking.remove();
+    const reply = data.content?.[0]?.text || "Sorry, I couldn't process that request.";
+    body.innerHTML += `<div class="msg msg-ai">${reply.replace(/\n/g,"<br>")}</div>`;
+  } catch(e){
+    thinking.remove();
+    body.innerHTML += `<div class="msg msg-ai">Error connecting to AI. Please check your API key setup.</div>`;
+  }
+  btn.disabled = false;
+  body.scrollTop = body.scrollHeight;
+}
+</script>
+</body>
+</html>
