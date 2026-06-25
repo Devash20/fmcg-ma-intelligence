@@ -72,17 +72,19 @@ st.markdown("""
 # DATA LOADING HELPER
 # ─────────────────────────────────────────────
 
+script_dir = Path(__file__).parent.resolve()
+
 def load_pipeline_data():
-    deals_file = Path("deals_final.json")
-    newsletter_file = Path("newsletter_draft.txt")
-    dedup_file = Path("dedup_log.json")
+    deals_file = script_dir / "deals_final.json"
+    newsletter_file = script_dir / "newsletter_draft.txt"
+    dedup_file = script_dir / "dedup_log.json"
     
     # Auto-run static pipeline if no files exist yet to avoid blank screens
     if not deals_file.exists() or not newsletter_file.exists():
         try:
-            subprocess.run([sys.executable, "pipeline_hybrid.py"], check=True)
-            subprocess.run([sys.executable, "generate_excel.py"], check=True)
-            subprocess.run([sys.executable, "generate_word.py"], check=True)
+            subprocess.run([sys.executable, str(script_dir / "pipeline_hybrid.py")], cwd=str(script_dir), check=True)
+            subprocess.run([sys.executable, str(script_dir / "generate_excel.py")], cwd=str(script_dir), check=True)
+            subprocess.run([sys.executable, str(script_dir / "generate_word.py")], cwd=str(script_dir), check=True)
         except Exception as e:
             st.sidebar.error(f"Initial run failed: {e}")
             
@@ -113,9 +115,10 @@ def load_pipeline_data():
     # Load raw count
     raw_count = 16
     raw_articles_list = []
-    if Path("live_ingestion_output.json").exists():
+    live_output_file = script_dir / "live_ingestion_output.json"
+    if live_output_file.exists():
         try:
-            with open("live_ingestion_output.json", "r", encoding="utf-8") as f:
+            with open(live_output_file, "r", encoding="utf-8") as f:
                 live_data = json.load(f)
                 raw_articles_list = [a.get("headline", "") for a in live_data.get("raw_articles", [])]
                 raw_count = len(raw_articles_list)
@@ -156,9 +159,10 @@ avg_score_str = f"{avg_score:.1f}/10"
 
 # Determine data source label
 data_source_label = "STATIC"
-if Path("deals_final.json").exists():
+deals_file_path = script_dir / "deals_final.json"
+if deals_file_path.exists():
     try:
-        with open("deals_final.json", "r", encoding="utf-8") as f:
+        with open(deals_file_path, "r", encoding="utf-8") as f:
             first_deal = json.load(f)[0]
             if first_deal.get("id", "").startswith("live"):
                 data_source_label = "LIVE"
@@ -207,8 +211,8 @@ with st.sidebar:
         st.metric("Deduplicated", f"{unique_count}", "unique")
     
     last_updated = st.empty()
-    if Path("deals_final.json").exists():
-        mtime = Path("deals_final.json").stat().st_mtime
+    if deals_file_path.exists():
+        mtime = deals_file_path.stat().st_mtime
         last_updated.caption(f"Last Run: {datetime.fromtimestamp(mtime).strftime('%H:%M:%S')} ({data_source_label})")
     else:
         last_updated.caption("Last run: Never")
@@ -221,24 +225,24 @@ with st.sidebar:
 if run_live:
     with st.status("Executing Live Pipeline (Fetching & Processing)...") as status:
         st.write("Step 1/4: Aggregating live articles from NewsAPI, RSS, SEC EDGAR, Google News...")
-        subprocess.run([sys.executable, "live_ingestion.py"], check=True)
+        subprocess.run([sys.executable, str(script_dir / "live_ingestion.py")], cwd=str(script_dir), check=True)
         st.write("Step 2/4: Deduplicating and scoring articles...")
-        subprocess.run([sys.executable, "pipeline_hybrid.py", "--live"], check=True)
+        subprocess.run([sys.executable, str(script_dir / "pipeline_hybrid.py"), "--live"], cwd=str(script_dir), check=True)
         st.write("Step 3/4: Generating structured Excel draft...")
-        subprocess.run([sys.executable, "generate_excel.py"], check=True)
+        subprocess.run([sys.executable, str(script_dir / "generate_excel.py")], cwd=str(script_dir), check=True)
         st.write("Step 4/4: Generating structured Word draft...")
-        subprocess.run([sys.executable, "generate_word.py"], check=True)
+        subprocess.run([sys.executable, str(script_dir / "generate_word.py")], cwd=str(script_dir), check=True)
         status.update(label="Live Pipeline execution complete!", state="complete", expanded=False)
     st.rerun()
 
 if run_static:
     with st.status("Executing Static Pipeline...") as status:
         st.write("Step 1/3: Loading static deals and running scoring/dedup...")
-        subprocess.run([sys.executable, "pipeline_hybrid.py"], check=True)
+        subprocess.run([sys.executable, str(script_dir / "pipeline_hybrid.py")], cwd=str(script_dir), check=True)
         st.write("Step 2/3: Generating structured Excel draft...")
-        subprocess.run([sys.executable, "generate_excel.py"], check=True)
+        subprocess.run([sys.executable, str(script_dir / "generate_excel.py")], cwd=str(script_dir), check=True)
         st.write("Step 3/3: Generating structured Word draft...")
-        subprocess.run([sys.executable, "generate_word.py"], check=True)
+        subprocess.run([sys.executable, str(script_dir / "generate_word.py")], cwd=str(script_dir), check=True)
         status.update(label="Static Pipeline execution complete!", state="complete", expanded=False)
     st.rerun()
 
@@ -377,10 +381,10 @@ with tab4:
         # Read download files
         txt_data = newsletter_text
         
-        xlsx_path = Path("FMCG_MA_Newsletter.xlsx")
+        xlsx_path = script_dir / "FMCG_MA_Newsletter.xlsx"
         xlsx_data = xlsx_path.read_bytes() if xlsx_path.exists() else b""
         
-        docx_path = Path("FMCG_MA_Newsletter.docx")
+        docx_path = script_dir / "FMCG_MA_Newsletter.docx"
         docx_data = docx_path.read_bytes() if docx_path.exists() else b""
         
         with col_dl1:

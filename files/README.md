@@ -19,21 +19,55 @@
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                    FMCG M&A INTELLIGENCE PIPELINE                       │
-└─────────────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    %% Ingestion Sources
+    subgraph Sourcing ["1. Data Ingestion (live_ingestion.py)"]
+        A1[NewsAPI / Google News]
+        A2[Trade RSS Feeds<br/>FoodBev / Reuters Food / FMCG News]
+        A3[SEC EDGAR API<br/>PepsiCo / Coca-Cola / Unilever 8-K & 425]
+        A4[BusinessWire Press Releases]
+    end
 
-  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-  │  STAGE 1     │    │  STAGE 2     │    │  STAGE 3     │    │  STAGE 4     │
-  │  INGESTION   │───▶│  DEDUP       │───▶│  SCORING     │───▶│  NEWSLETTER  │
-  └──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
-        │                   │                   │                   │
-   Web search          Group match         Relevance           5 sections
-   SEC filings         + headline          + credibility       + CSV/XLSX
-   Trade press         similarity ≥0.75    composite ≥5.5      + CSV/XLSX
-   30 articles         → 23 unique         → all 14 pass       → Word/HTML
-   (live)              (live dedup)        (static pass)       → Streamlit
+    %% Pipeline Processing
+    subgraph Pipeline ["2. Processing Pipeline (pipeline_hybrid.py)"]
+        B[Raw Ingested JSON] --> C[Two-Pass Deduplication]
+        
+        subgraph Dedup ["Deduplication Rules"]
+            C1["Pass A: Exact Acquirer + Target Grouping"]
+            C2["Pass B: Headline Similarity (difflib >= 0.75)"]
+        end
+        C --> C1
+        C --> C2
+        
+        C1 & C2 --> D[Composite Scoring Engine]
+        
+        subgraph Scoring ["Scoring Rules"]
+            D1["FMCG Relevance (60% weight)<br/>30+ Industry Keywords Density"]
+            D2["Source Credibility (40% weight)<br/>Tier 1: SEC (10)<br/>Tier 2: Trade (7)<br/>Tier 3: Blogs (3)"]
+        end
+        D --> D1
+        D --> D2
+        
+        D1 & D2 --> E{Threshold Check<br/>Composite >= 5.5?}
+    end
+
+    %% Outputs & Presentation
+    subgraph Outputs ["3. Structured Deliverables & UI"]
+        E -- "Yes (Score >= 5.5)" --> F1[deals_final.json]
+        E -- "No (Score < 5.5)" --> F2[deals_final.csv]
+        E -- "Categorized Newsletter Draft" --> G[newsletter_draft.txt]
+        
+        G --> H1[generate_excel.py<br/>FMCG_MA_Newsletter.xlsx]
+        G --> H2[generate_word.py<br/>FMCG_MA_Newsletter.docx]
+        
+        F1 & F2 & G --> I[streamlit_app.py<br/>Live Interactive Dashboard]
+        F1 --> J[FMCG_Newsletter_App.html<br/>HTML App with Claude Chat]
+    end
+
+    style Sourcing fill:#e6f2ff,stroke:#0066cc,stroke-width:2px
+    style Pipeline fill:#fff0e6,stroke:#ff6600,stroke-width:2px
+    style Outputs fill:#e6ffe6,stroke:#009933,stroke-width:2px
 ```
 
 ---
